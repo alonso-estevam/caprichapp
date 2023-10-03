@@ -35,6 +35,7 @@ As perguntas foram armazenadas em um ArrayList de String, para facilitar a itera
 Fiz um método separado para calcular o resultado, facilitando a legibilidade e separação de responsabilidades.
 ### Aprendizados
 Em relação ao versionamento, tentei seguir o "Feature Branch Workflow", então cada tarefa/feature terá sua própria branch. Um erro que aconteceu foi que o git na minha máquina está com o nome default da branch principal de "master", mas aqui no meu github está "main". Assim, quando tentei fazer outro commit inicial e dar merge, a branch "master" da minha máquina apareceu aqui como uma branch à parte. 
+Para renomear a minha branch local que estava com o nome "master", usei o comando: `git branch -m master main`
 Outro aprendizado foi na criação da branch para a tarefa específica do questionário: eu criei primeiro na minha máquina local e fiz os commits. Na hora de subir para o repositório remoto, apareceu a seguinte mensagem:
 ```
 fatal: The current branch feat/capitulo-1-questionario-estatico has no upstream branch.
