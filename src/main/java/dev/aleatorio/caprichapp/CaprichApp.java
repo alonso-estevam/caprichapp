@@ -9,7 +9,10 @@ import java.util.Set;
 
 public class CaprichApp {
 
+	private static final int NUMERO_DE_PERGUNTAS = 5;
+
 	public static void main(String[] args) {
+
 		
 		List<String> bancoDePerguntas = new ArrayList<>();
 		bancoDePerguntas.add("Você já sonhou em fazer uma viagem à Lua com seu melhor amigo?");
@@ -24,7 +27,7 @@ public class CaprichApp {
 		bancoDePerguntas.add("Você já pensou em criar um podcast sobre teorias da conspiração envolvendo a vida secreta do seu melhor amigo?");
 		bancoDePerguntas.add("Você acredita que seu amigo é a verdadeira inspiração por trás das músicas de karaokê?");
 		bancoDePerguntas.add("Você acha que seu amigo possui um diploma honorário em Mímica Avançada?");
-		bancoDePerguntas.add("Você acha que seu amigo é o verdadeiro criador das terríveis baratas voadas?");
+		bancoDePerguntas.add("Você acha que seu amigo é o verdadeiro criador das terríveis baratas voadoras?");
 		
 			
 		System.out.println("♥♥♥♥♥♥♥♥ CAPRICHAPP ♥♥♥♥♥♥♥♥");
@@ -67,7 +70,7 @@ public class CaprichApp {
 	public static Set<String> obterPerguntasAleatorias(List<String> bancoDePerguntas) {
 		Set<String> perguntasSelecionadas = new HashSet<>();
 		Random random = new Random();
-        while(perguntasSelecionadas.size() != 5) {
+        while(perguntasSelecionadas.size() != NUMERO_DE_PERGUNTAS) {
             perguntasSelecionadas.add(bancoDePerguntas.get(random.nextInt(bancoDePerguntas.size())));
         }
         return perguntasSelecionadas;
