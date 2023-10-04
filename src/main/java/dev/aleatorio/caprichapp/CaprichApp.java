@@ -19,7 +19,9 @@ public class CaprichApp {
 		System.out.println("♥♥♥♥♥♥♥♥ CAPRICHAPP ♥♥♥♥♥♥♥♥");
 		System.out.println("Você está a fim do seu melhor amigo? Para cada pergunta, responda S para sim ou N para não");
 		System.out.println("♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥");
+		
 		int pontuacao = 0;
+		
 		Scanner sc = new Scanner(System.in);
 		
 		for (String pergunta : perguntas) {
