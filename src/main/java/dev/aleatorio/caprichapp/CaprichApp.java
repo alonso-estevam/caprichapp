@@ -1,30 +1,42 @@
 package dev.aleatorio.caprichapp;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
+import java.util.Set;
 
 public class CaprichApp {
 
 	public static void main(String[] args) {
 		
-		List<String> perguntas = new ArrayList<>();
-		perguntas.add("Você já sonhou que seu melhor amigo era um unicórnio voando sobre arco-íris cor-de-rosa enquanto segurava um buquê de salsichas?");
-		perguntas.add("Você já se viu dançando a dança do frango em homenagem ao aniversário do seu melhor amigo, vestida de pinguim?");
-		perguntas.add("Se seu melhor amigo fosse um sorvete, ele seria o sorvete de pistache?");
-		perguntas.add("Você pensa em patos de borracha quando olha para o seu melhor amigo?");
-		perguntas.add("Você já escreveu um poema de amor épico para o seu melhor amigo usando apenas emojis de vegetais?");
-		perguntas.add("Você acha que seu melhor amigo seria um bom companheiro numa luta contra zumbis alienígenas usando almofadas como armas?");
-
+		List<String> bancoDePerguntas = new ArrayList<>();
+		bancoDePerguntas.add("Você já sonhou em fazer uma viagem à Lua com seu melhor amigo?");
+		bancoDePerguntas.add("Você acha que seu amigo é a reencarnação de um unicórnio?");
+		bancoDePerguntas.add("Você já considerou mudar seu nome para Geleca apenas para combinar com o apelido do seu amigo?");
+		bancoDePerguntas.add("Você acredita que seu amigo é secretamente um super-herói disfarçado?");
+		bancoDePerguntas.add("Você já planejou uma festa surpresa de aniversário para o seu amigo no dia errado, só para ver a reação?");
+		bancoDePerguntas.add("Você acha que seu amigo é a única pessoa capaz de decifrar porque o cocô das cabras é redondo e o do wombat é quadrado?");
+		bancoDePerguntas.add("Você já pensou em criar um clube exclusivo para pessoas que usam pijamas de abacaxi nas segundas-feiras?");
+		bancoDePerguntas.add("Você consegue segurar o tchan?");
+		bancoDePerguntas.add("Você já considerou tatuar uma imagem de batata frita no braço em homenagem ao seu amigo?");
+		bancoDePerguntas.add("Você já pensou em criar um podcast sobre teorias da conspiração envolvendo a vida secreta do seu melhor amigo?");
+		bancoDePerguntas.add("Você acredita que seu amigo é a verdadeira inspiração por trás das músicas de karaokê?");
+		bancoDePerguntas.add("Você acha que seu amigo possui um diploma honorário em Mímica Avançada?");
+		bancoDePerguntas.add("Você acha que seu amigo é o verdadeiro criador das terríveis baratas voadas?");
+		
+			
 		System.out.println("♥♥♥♥♥♥♥♥ CAPRICHAPP ♥♥♥♥♥♥♥♥");
 		System.out.println("Você está a fim do seu melhor amigo? Para cada pergunta, responda S para sim ou N para não");
 		System.out.println("♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥");
 		
 		int pontuacao = 0;
 		
+		Set<String> perguntasSelecionadas = obterPerguntasAleatorias(bancoDePerguntas);		
 		Scanner sc = new Scanner(System.in);
 		
-		for (String pergunta : perguntas) {
+		for (String pergunta : perguntasSelecionadas) {
 			System.out.println(pergunta + " ");
 			char resposta = sc.next().toLowerCase().charAt(0);
 			if(resposta == 's') {
@@ -50,6 +62,15 @@ public class CaprichApp {
 		} else {
 			return "🎵 É o amor /Que mexe com minha cabeça e me deixa assim/\nQue faz eu pensar em você e esquecer de mim/\nQue faz eu esquecer que a vida é feita pra viver.";
 		}
+	}
+	
+	public static Set<String> obterPerguntasAleatorias(List<String> bancoDePerguntas) {
+		Set<String> perguntasSelecionadas = new HashSet<>();
+		Random random = new Random();
+        while(perguntasSelecionadas.size() != 5) {
+            perguntasSelecionadas.add(bancoDePerguntas.get(random.nextInt(bancoDePerguntas.size())));
+        }
+        return perguntasSelecionadas;
 	}
 }
 
