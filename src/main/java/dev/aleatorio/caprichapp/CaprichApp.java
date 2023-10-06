@@ -7,50 +7,70 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
 
+import dev.aleatorio.caprichapp.model.Enquete;
+import dev.aleatorio.caprichapp.model.Opcao;
+import dev.aleatorio.caprichapp.model.Pergunta;
+
 public class CaprichApp {
 
-	private static final int NUMERO_DE_PERGUNTAS = 5;
-
 	public static void main(String[] args) {
+		
+		Enquete enquete = new Enquete();
+		Scanner sc = new Scanner(System.in);
 
+		System.out.println("♥♥♥♥♥♥♥♥ CAPRICHAPP ENQUETES ♥♥♥♥♥♥♥♥");
+
+//		Fase 0) O programa perguntará qual é o título do questionário.
+		System.out.print("\nQual o título do questionário? ");
+		enquete.setTitulo(sc.nextLine());
 		
-		List<String> bancoDePerguntas = new ArrayList<>();
-		bancoDePerguntas.add("Você já sonhou em fazer uma viagem à Lua com seu melhor amigo?");
-		bancoDePerguntas.add("Você acha que seu amigo é a reencarnação de um unicórnio?");
-		bancoDePerguntas.add("Você já considerou mudar seu nome para Geleca apenas para combinar com o apelido do seu amigo?");
-		bancoDePerguntas.add("Você acredita que seu amigo é secretamente um super-herói disfarçado?");
-		bancoDePerguntas.add("Você já planejou uma festa surpresa de aniversário para o seu amigo no dia errado, só para ver a reação?");
-		bancoDePerguntas.add("Você acha que seu amigo é a única pessoa capaz de decifrar porque o cocô das cabras é redondo e o do wombat é quadrado?");
-		bancoDePerguntas.add("Você já pensou em criar um clube exclusivo para pessoas que usam pijamas de abacaxi nas segundas-feiras?");
-		bancoDePerguntas.add("Você consegue segurar o tchan?");
-		bancoDePerguntas.add("Você já considerou tatuar uma imagem de batata frita no braço em homenagem ao seu amigo?");
-		bancoDePerguntas.add("Você já pensou em criar um podcast sobre teorias da conspiração envolvendo a vida secreta do seu melhor amigo?");
-		bancoDePerguntas.add("Você acredita que seu amigo é a verdadeira inspiração por trás das músicas de karaokê?");
-		bancoDePerguntas.add("Você acha que seu amigo possui um diploma honorário em Mímica Avançada?");
-		bancoDePerguntas.add("Você acha que seu amigo é o verdadeiro criador das terríveis baratas voadoras?");
+//		Fase 1) O programa perguntará quantas perguntas você deseja fazer.
+		System.out.print("Quantas perguntas você deseja fazer? ");
+		enquete.setNumeroDePerguntas(Integer.valueOf(sc.nextLine()));
 		
+		for (int i = 1; i <= enquete.getNumeroDePerguntas(); i++) {
+			System.out.printf("===============\nDigite a %dº pergunta: \n", i);
+			String enunciado = sc.nextLine();
+			Pergunta pergunta = new Pergunta(enunciado);
 			
-		System.out.println("♥♥♥♥♥♥♥♥ CAPRICHAPP ♥♥♥♥♥♥♥♥");
-		System.out.println("Você está a fim do seu melhor amigo? Para cada pergunta, responda S para sim ou N para não");
-		System.out.println("♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥");
+//		Fase 2) Para cada pergunta, o programa perguntará quais são as opções 
+//		e o peso da resposta de cada uma delas.
+			System.out.print("Digite o número de opções: \n");
+			int numeroDeOpcoes = Integer.valueOf(sc.nextLine());
+			
+			for (int j = 1; j <= numeroDeOpcoes; j++) {
+				System.out.printf("Digite o texto da %dº opção: \n", j);
+				String texto = sc.nextLine();
+				System.out.printf("Digite o peso da %dº opção: \n", j);
+				int peso = Integer.valueOf(sc.nextLine());
+				pergunta.adicionarOpcao(new Opcao (texto, peso));
+			}
+			
+			enquete.adicionarPergunta(pergunta);
+		}
+		
+//		Fase 3) Em seguida, o programa perguntará quais são as respostas 
+//		e quais são as faixas de valores utilizadas.
+
+//		Fase 4) Por fim, o programa realizará a enquete ao usuário, usando como entrada os dados fornecidos nas etapas anteriores e respondendo ao que foi perguntado.
+		enquete.getPerguntas().forEach(System.out::println);
 		
 		int pontuacao = 0;
 		
-		Set<String> perguntasSelecionadas = obterPerguntasAleatorias(bancoDePerguntas);		
-		Scanner sc = new Scanner(System.in);
+//		Set<String> perguntasSelecionadas = obterPerguntasAleatorias(bancoDePerguntas);		
 		
-		for (String pergunta : perguntasSelecionadas) {
-			System.out.println(pergunta + " ");
-			char resposta = sc.next().toLowerCase().charAt(0);
-			if(resposta == 's') {
-				pontuacao++;
-			}
-		}
+//		for (String pergunta : perguntasSelecionadas) {
+//			System.out.println(pergunta + " ");
+//			char resposta = sc.next().toLowerCase().charAt(0);
+//			if(resposta == 's') {
+//				pontuacao++;
+//			}
+//		}
 		
-		String resultado = calcularResultado(pontuacao);
-		System.out.println("♥♥♥♥♥♥♥♥ RESULTADO ♥♥♥♥♥♥♥♥");
-		System.out.println("Sua pontuação foi " + pontuacao + ". Isso significa que...\n" + resultado);
-		sc.close();
+//		String resultado = calcularResultado(pontuacao);
+//		System.out.println("♥♥♥♥♥♥♥♥ RESULTADO ♥♥♥♥♥♥♥♥");
+//		System.out.println("Sua pontuação foi " + pontuacao + ". Isso significa que...\n" + resultado);
+//		sc.close();
 	
 	}
 	
@@ -67,13 +87,6 @@ public class CaprichApp {
 		}
 	}
 	
-	public static Set<String> obterPerguntasAleatorias(List<String> bancoDePerguntas) {
-		Set<String> perguntasSelecionadas = new HashSet<>();
-		Random random = new Random();
-        while(perguntasSelecionadas.size() != NUMERO_DE_PERGUNTAS) {
-            perguntasSelecionadas.add(bancoDePerguntas.get(random.nextInt(bancoDePerguntas.size())));
-        }
-        return perguntasSelecionadas;
-	}
+
 }
 
