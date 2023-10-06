@@ -1,79 +1,78 @@
 package dev.aleatorio.caprichapp;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
 import java.util.Scanner;
-import java.util.Set;
+
+import dev.aleatorio.caprichapp.model.Enquete;
+import dev.aleatorio.caprichapp.model.FaixaDeValores;
+import dev.aleatorio.caprichapp.model.Opcao;
+import dev.aleatorio.caprichapp.model.Pergunta;
 
 public class CaprichApp {
 
-	private static final int NUMERO_DE_PERGUNTAS = 5;
-
 	public static void main(String[] args) {
-
 		
-		List<String> bancoDePerguntas = new ArrayList<>();
-		bancoDePerguntas.add("Você já sonhou em fazer uma viagem à Lua com seu melhor amigo?");
-		bancoDePerguntas.add("Você acha que seu amigo é a reencarnação de um unicórnio?");
-		bancoDePerguntas.add("Você já considerou mudar seu nome para Geleca apenas para combinar com o apelido do seu amigo?");
-		bancoDePerguntas.add("Você acredita que seu amigo é secretamente um super-herói disfarçado?");
-		bancoDePerguntas.add("Você já planejou uma festa surpresa de aniversário para o seu amigo no dia errado, só para ver a reação?");
-		bancoDePerguntas.add("Você acha que seu amigo é a única pessoa capaz de decifrar porque o cocô das cabras é redondo e o do wombat é quadrado?");
-		bancoDePerguntas.add("Você já pensou em criar um clube exclusivo para pessoas que usam pijamas de abacaxi nas segundas-feiras?");
-		bancoDePerguntas.add("Você consegue segurar o tchan?");
-		bancoDePerguntas.add("Você já considerou tatuar uma imagem de batata frita no braço em homenagem ao seu amigo?");
-		bancoDePerguntas.add("Você já pensou em criar um podcast sobre teorias da conspiração envolvendo a vida secreta do seu melhor amigo?");
-		bancoDePerguntas.add("Você acredita que seu amigo é a verdadeira inspiração por trás das músicas de karaokê?");
-		bancoDePerguntas.add("Você acha que seu amigo possui um diploma honorário em Mímica Avançada?");
-		bancoDePerguntas.add("Você acha que seu amigo é o verdadeiro criador das terríveis baratas voadoras?");
-		
-			
-		System.out.println("♥♥♥♥♥♥♥♥ CAPRICHAPP ♥♥♥♥♥♥♥♥");
-		System.out.println("Você está a fim do seu melhor amigo? Para cada pergunta, responda S para sim ou N para não");
-		System.out.println("♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥");
-		
-		int pontuacao = 0;
-		
-		Set<String> perguntasSelecionadas = obterPerguntasAleatorias(bancoDePerguntas);		
+		Enquete enquete = new Enquete();
 		Scanner sc = new Scanner(System.in);
+
+		System.out.println("♥♥♥♥♥♥♥♥ 𝓒𝓪𝓹𝓻𝓲𝓬𝓱𝓐𝓹𝓹 ♥♥♥♥♥♥♥♥");
+		System.out.println("(っ◔◡◔)っ CADASTRO DE ENQUETES");
+
+		System.out.print("\nQual o título do questionário? ");
+		enquete.setTitulo(sc.nextLine());
 		
-		for (String pergunta : perguntasSelecionadas) {
-			System.out.println(pergunta + " ");
-			char resposta = sc.next().toLowerCase().charAt(0);
-			if(resposta == 's') {
-				pontuacao++;
+		System.out.print("Quantas perguntas você deseja fazer? ");
+		enquete.setNumeroDePerguntas(Integer.valueOf(sc.nextLine()));
+		
+		for (int i = 1; i <= enquete.getNumeroDePerguntas(); i++) {
+			System.out.printf("===============\nDigite a %dº pergunta: ", i);
+			String enunciado = sc.nextLine();
+			Pergunta pergunta = new Pergunta(enunciado);
+			
+			System.out.print("Digite o número de opções: ");
+			int numeroDeOpcoes = Integer.valueOf(sc.nextLine());
+			
+			for (int j = 1; j <= numeroDeOpcoes; j++) {
+				System.out.printf("\tDigite o texto da %dº opção: ", j);
+				String texto = sc.nextLine();
+				System.out.printf("\tDigite o peso da %dº opção: ", j);
+				int peso = Integer.valueOf(sc.nextLine());
+				pergunta.adicionarOpcao(new Opcao (texto, peso));
 			}
+			
+			enquete.adicionarPergunta(pergunta);
+		}
+		System.out.print("\n==============\nPerguntas e opções coletadas com sucesso!"
+				+ "\nAgora insira quantas faixas de valores a enquete terá: ");
+		int faixaValores = Integer.valueOf(sc.nextLine());
+		for (int i = 1; i <= faixaValores; i++) {
+			System.out.printf("--------\nDigite o valor MÍNIMO da %dº faixa de valores: ", i);
+			int minimo = Integer.valueOf(sc.nextLine());
+			System.out.printf("Digite o valor MÁXIMO da %dº faixa de valores: ", i);
+			int maximo = Integer.valueOf(sc.nextLine());
+			System.out.printf("Digite a resposta correspondente a %dº faixa de valores: ", i);
+			String resposta = sc.nextLine();
+			
+			enquete.adicionarFaixaDeValores(new FaixaDeValores(minimo, maximo, resposta));
 		}
 		
-		String resultado = calcularResultado(pontuacao);
-		System.out.println("♥♥♥♥♥♥♥♥ RESULTADO ♥♥♥♥♥♥♥♥");
+		System.out.printf("\n•._.••´¯``•.¸¸.•` ENQUETE: %s •._.••´¯``•.¸¸.•`\n", enquete.getTitulo());
+		int pontuacao = 0;
+		
+		for (Pergunta pergunta : enquete.getPerguntas()) {
+			System.out.println(pergunta.getEnunciado() + " ");
+			pergunta.exibirOpcoes();
+			System.out.print("Digite a letra da opção escolhida: ");
+			char opcaoSelecionada = sc.next().toUpperCase().charAt(0);
+			int index = (int) opcaoSelecionada - 65;
+			pontuacao += pergunta.getOpcoes().get(index).getPeso();
+		}
+		
+		String resultado = enquete.calcularResultado(pontuacao);
+		System.out.println("•._.••´¯``•.¸¸.•` RESULTADO ⋆ •._.••´¯``•.¸¸.•` ");
 		System.out.println("Sua pontuação foi " + pontuacao + ". Isso significa que...\n" + resultado);
 		sc.close();
 	
 	}
 	
-	public static String calcularResultado(int pontuacao) {
-		if(pontuacao < 0) {
-			throw new IllegalArgumentException("Erro: A pontuação não pode ser negativa");
-		}
-		if(pontuacao >= 0 && pontuacao <= 2) {
-			return "☺ Você colocou seu melhor amigo na friendzone.\nO que é ótimo porque talvez ele seja apenas seu amigo.";
-		} else if (pontuacao >= 3 && pontuacao <= 4) {
-			return "Talvez haja amor, talvez seja hormônios.\n☻ Vale a pena experimentar uns cinco minutos de trocação de beijo sem estragar a amizade.";
-		} else {
-			return "🎵 É o amor /Que mexe com minha cabeça e me deixa assim/\nQue faz eu pensar em você e esquecer de mim/\nQue faz eu esquecer que a vida é feita pra viver.";
-		}
-	}
-	
-	public static Set<String> obterPerguntasAleatorias(List<String> bancoDePerguntas) {
-		Set<String> perguntasSelecionadas = new HashSet<>();
-		Random random = new Random();
-        while(perguntasSelecionadas.size() != NUMERO_DE_PERGUNTAS) {
-            perguntasSelecionadas.add(bancoDePerguntas.get(random.nextInt(bancoDePerguntas.size())));
-        }
-        return perguntasSelecionadas;
-	}
 }
 
