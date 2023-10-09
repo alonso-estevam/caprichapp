@@ -92,3 +92,20 @@ public static Set<String> obterPerguntasAleatorias(List<String> bancoDePerguntas
     return perguntasSelecionadas; // retornando o HashSet com as perguntas selecionadas de modo aleatório
 }
 ```
+
+### Capítulo 3: 
+Após a entrega, seu chefe apenas disse seu projeto estava tolerável e que ia levar para a diretoria. Semanas sem resposta. Muito pelo contrário. Delipe Fylon foi demitido por justa causas acusado de ter roubado o grampeador da firma e ter levado ele para as férias de verão tirando fotos do mesmo na frente de pontos turísticos. Com isso você acaba sendo promovido, passando a acumular funções sem aumento de salário. Sua nova função consiste em criar as enquetes para serem usadas. Meio sem uma orientação você acredita que pode utilizar a sua aplicação para facilitar sua vida. Após refletir um pouco você chega a conclusão de quais alterações no código você precisará escrever:
+
+Altere o programa para ter 5 fases:
+
+Fase 0) O programa perguntará qual é o título do questionário.
+Fase 1) O programa perguntará quantas perguntas você deseja fazer.
+Fase 2) Para cada pergunta, o programa perguntará quais são as opções e o peso da resposta de cada uma delas.
+Fase 3) Em seguida, o programa perguntará quais são as respostas e quais são as faixas de valores utilizadas.
+Fase 4) Por fim, o programa realizará a enquete ao usuário, usando como entrada os dados fornecidos nas etapas anteriores e respondendo ao que foi perguntado.
+
+### Resolução
+Nesse ponto da jornada, resolvi criar classes para representar as entidades do negócio, no caso, a Enquete. Para uma explicação um pouco mais detalhada, fiz esse vídeo:
+
+https://www.youtube.com/watch?v=7EdSoZzXKnM
+
