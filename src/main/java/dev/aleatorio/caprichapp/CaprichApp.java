@@ -1,29 +1,42 @@
 package dev.aleatorio.caprichapp;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Scanner;
 
-import dev.aleatorio.caprichapp.model.Enquete;
+import com.google.gson.Gson;
+
 import dev.aleatorio.caprichapp.model.FaixaDeValores;
 import dev.aleatorio.caprichapp.model.Opcao;
 import dev.aleatorio.caprichapp.model.Pergunta;
+import dev.aleatorio.caprichapp.model.Questionario;
 
 public class CaprichApp {
-
+	private static final String DIRETORIO_BASE = "C:\\temp\\caprichapp";
+	
 	public static void main(String[] args) {
+		File diretorioBase = new File(DIRETORIO_BASE);
 		
-		Enquete enquete = new Enquete();
+		if(!diretorioBase.exists()) {
+			diretorioBase.mkdirs();
+		}
+		
+
+		Questionario questionario = new Questionario();
 		Scanner sc = new Scanner(System.in);
 
 		System.out.println("♥♥♥♥♥♥♥♥ 𝓒𝓪𝓹𝓻𝓲𝓬𝓱𝓐𝓹𝓹 ♥♥♥♥♥♥♥♥");
-		System.out.println("(っ◔◡◔)っ CADASTRO DE ENQUETES");
+		System.out.println("(っ◔◡◔)っ CADASTRO DE QUESTIONÁRIOS");
 
 		System.out.print("\nQual o título do questionário? ");
-		enquete.setTitulo(sc.nextLine());
+		questionario.setTitulo(sc.nextLine());
 		
 		System.out.print("Quantas perguntas você deseja fazer? ");
-		enquete.setNumeroDePerguntas(Integer.valueOf(sc.nextLine()));
+		questionario.setNumeroDePerguntas(Integer.valueOf(sc.nextLine()));
 		
-		for (int i = 1; i <= enquete.getNumeroDePerguntas(); i++) {
+		for (int i = 1; i <= questionario.getNumeroDePerguntas(); i++) {
 			System.out.printf("===============\nDigite a %dº pergunta: ", i);
 			String enunciado = sc.nextLine();
 			Pergunta pergunta = new Pergunta(enunciado);
@@ -39,10 +52,10 @@ public class CaprichApp {
 				pergunta.adicionarOpcao(new Opcao (texto, peso));
 			}
 			
-			enquete.adicionarPergunta(pergunta);
+			questionario.adicionarPergunta(pergunta);
 		}
 		System.out.print("\n==============\nPerguntas e opções coletadas com sucesso!"
-				+ "\nAgora insira quantas faixas de valores a enquete terá: ");
+				+ "\nAgora insira quantas faixas de valores a questionario terá: ");
 		int faixaValores = Integer.valueOf(sc.nextLine());
 		for (int i = 1; i <= faixaValores; i++) {
 			System.out.printf("--------\nDigite o valor MÍNIMO da %dº faixa de valores: ", i);
@@ -52,27 +65,38 @@ public class CaprichApp {
 			System.out.printf("Digite a resposta correspondente a %dº faixa de valores: ", i);
 			String resposta = sc.nextLine();
 			
-			enquete.adicionarFaixaDeValores(new FaixaDeValores(minimo, maximo, resposta));
+			questionario.adicionarFaixaDeValores(new FaixaDeValores(minimo, maximo, resposta));
 		}
 		
-		System.out.printf("\n•._.••´¯``•.¸¸.•` ENQUETE: %s •._.••´¯``•.¸¸.•`\n", enquete.getTitulo());
-		int pontuacao = 0;
-		
-		for (Pergunta pergunta : enquete.getPerguntas()) {
-			System.out.println(pergunta.getEnunciado() + " ");
-			pergunta.exibirOpcoes();
-			System.out.print("Digite a letra da opção escolhida: ");
-			char opcaoSelecionada = sc.next().toUpperCase().charAt(0);
-			int index = (int) opcaoSelecionada - 65;
-			pontuacao += pergunta.getOpcoes().get(index).getPeso();
-		}
-		
-		String resultado = enquete.calcularResultado(pontuacao);
-		System.out.println("•._.••´¯``•.¸¸.•` RESULTADO ⋆ •._.••´¯``•.¸¸.•` ");
-		System.out.println("Sua pontuação foi " + pontuacao + ". Isso significa que...\n" + resultado);
 		sc.close();
-	
+		
+		questionario.setId(1);
+		
+		System.out.println();
+		
+		String json = converterQuestionarioEmJson(questionario);
+		
+		salvarJsonEmArquivo(json, questionario);
+				
 	}
+	
+	private static String converterQuestionarioEmJson(Questionario questionario) {
+		Gson gson = new Gson();
+		return gson.toJson(questionario); 
+	}
+	
+	private static void salvarJsonEmArquivo(String json, Questionario ques) {
+		String nomeDoArquivo = String.format("%s%squestionario_%d.txt", 
+				DIRETORIO_BASE, File.separator, ques.getId()); 
+		
+		try(BufferedWriter bw = new BufferedWriter(new FileWriter(nomeDoArquivo))){
+			bw.write(json);
+			System.out.println("Arquivo salvo com sucesso!");
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+			
+	} 
 	
 }
 
