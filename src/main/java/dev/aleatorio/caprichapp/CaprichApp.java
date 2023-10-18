@@ -38,16 +38,50 @@ public class CaprichApp {
 	
 		
 		Scanner sc = new Scanner(System.in);
+		char opcao = 'Z';
+		
+		while(opcao != 'X'){
+			System.out.println("♥♥♥♥♥♥♥♥ 𝓒𝓪𝓹𝓻𝓲𝓬𝓱𝓐𝓹𝓹 ♥♥♥♥♥♥♥♥");
+			System.out.println("(っ◔◡◔)っ MENU INTERATIVO");
+			System.out.println("[A] CADASTRAR UM QUESTIONÁRIO\t[B] LISTAR TODOS OS QUESTIONÁRIOS");
+			System.out.println("[C] LISTAR UM QUESTIONÁRIO\t[D] EXCLUIR UM QUESTIONÁRIO");
+			System.out.println("[E] EDITAR UM QUESTIONÁRIO\t[X] SAIR");
+			
+			System.out.println("Digite a letra correspondente à opção desejada: ");
+			opcao = sc.nextLine().toUpperCase().charAt(0);
+			
+			switch(opcao) {
+				case 'A':
+					System.out.print("Opção selecionada: CADASTRAR um questionário.");
+					cadastrar(sc, ultimoId);
+					break;
+					
+				case 'B':
+					System.out.println("Opção selecionada: LISTAR TODOS os questionários.");
+					listarTodos(bancoDeQuestionarios);
+					break;
+				case 'C':
+					System.out.print("Opção selecionada: LISTAR UM questionário. Informe o id: ");
+					String resultado = listarPorId(sc.nextLine());
+					System.out.println(resultado);
+					break;
+				case 'D':
+					System.out.print("Opção selecionada: EXCLUIR um questionário. Informe o id: ");
+					deletar(sc.nextLine());
+					break;
+				case 'E':
+					System.out.print("Opção selecionada: EDITAR um questionário. Informe o id: ");
+					editar(sc, sc.nextLine());
+					break;
+				case 'X': 
+					System.out.println("ENCERRANDO APLICAÇÃO");
+					break;
+			}
+		}
+		
+		
 
-		System.out.println("♥♥♥♥♥♥♥♥ 𝓒𝓪𝓹𝓻𝓲𝓬𝓱𝓐𝓹𝓹 ♥♥♥♥♥♥♥♥");
-		System.out.println("(っ◔◡◔)っ CADASTRO DE QUESTIONÁRIOS");
 		
-		listarTodos(bancoDeQuestionarios);
-		
-		System.out.println("Digite o id do questionário a ser listado: ");
-		String id = sc.next();
-		
-		listarPorId(id);
 		
 		sc.close();
 		
@@ -56,9 +90,9 @@ public class CaprichApp {
 
 	private static int getUltimoId(List<Questionario> bancoDeQuestionarios) {
 		return bancoDeQuestionarios.stream()
-				.mapToInt(Questionario::getId) //IntStream
-				.max() // OptionalInt
-				.orElse(0); // int
+				.mapToInt(Questionario::getId)
+				.max()
+				.orElse(0);
 	}
 
 	private static void listarTodos(List<Questionario> bancoDeQuestionarios) {
@@ -134,6 +168,15 @@ public class CaprichApp {
 	private static String listarPorId(String id) {
 		File arquivo = new File(TEMPLATE_NOME_DO_ARQUIVO.replace("${id}", id));
 		return extrairConteudo(arquivo);
+	}
+	
+	private static void editar(Scanner sc, String id) {
+		System.out.println("Atenção! Durante a edição, o questionário será deletado e cadastrado novamente.");
+		deletar(id);
+		int idAtual = Integer.valueOf(id) - 1;
+		System.out.println("Preparando para novo cadastro (atualização)...");
+		cadastrar(sc, idAtual);
+		System.out.println("Questionario com id " + id + " atualizado com sucesso!");
 	}
 	
 	private static List<Questionario> carregarBancoQuestionarios(File diretorioBase){
