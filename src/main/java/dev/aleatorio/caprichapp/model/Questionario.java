@@ -3,15 +3,25 @@ package dev.aleatorio.caprichapp.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Enquete {
+public class Questionario {
+	
+	private int id;
 	private String titulo;
 	private int numeroDePerguntas;
 	private List<Pergunta> perguntas = new ArrayList<Pergunta>();
 	private List<FaixaDeValores> faixasDeValores = new ArrayList<>();
 		
-	public Enquete() {
+	public Questionario() {
 	}
 	
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
 	public String getTitulo() {
 		return titulo;
 	}
