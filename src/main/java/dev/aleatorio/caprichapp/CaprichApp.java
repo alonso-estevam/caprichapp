@@ -21,11 +21,13 @@ import dev.aleatorio.caprichapp.model.Pergunta;
 import dev.aleatorio.caprichapp.model.Questionario;
 
 public class CaprichApp {
+	
 	private static final String DIRETORIO_BASE = "C:\\temp\\caprichapp";
 	private static final String TEMPLATE_NOME_DO_ARQUIVO = DIRETORIO_BASE + File.separator + "questionario_${id}.txt";
 	private static final Gson GSON = new Gson();
 	
 	public static void main(String[] args) {
+		
 		File diretorioBase = new File(DIRETORIO_BASE);
 		
 		if(!diretorioBase.exists()) {
@@ -35,13 +37,12 @@ public class CaprichApp {
 		List<Questionario> bancoDeQuestionarios = carregarBancoQuestionarios(diretorioBase);
 		
 		int ultimoId = getUltimoId(bancoDeQuestionarios);
-	
 		
 		Scanner sc = new Scanner(System.in);
 		char opcao = 'Z';
 		
 		while(opcao != 'X'){
-			System.out.println("♥♥♥♥♥♥♥♥ 𝓒𝓪𝓹𝓻𝓲𝓬𝓱𝓐𝓹𝓹 ♥♥♥♥♥♥♥♥");
+			System.out.println("\n♥♥♥♥♥♥♥♥ 𝓒𝓪𝓹𝓻𝓲𝓬𝓱𝓐𝓹𝓹 ♥♥♥♥♥♥♥♥");
 			System.out.println("(っ◔◡◔)っ MENU INTERATIVO");
 			System.out.println("[A] CADASTRAR UM QUESTIONÁRIO\t[B] LISTAR TODOS OS QUESTIONÁRIOS");
 			System.out.println("[C] LISTAR UM QUESTIONÁRIO\t[D] EXCLUIR UM QUESTIONÁRIO");
@@ -55,7 +56,6 @@ public class CaprichApp {
 					System.out.print("Opção selecionada: CADASTRAR um questionário.");
 					cadastrar(sc, ultimoId);
 					break;
-					
 				case 'B':
 					System.out.println("Opção selecionada: LISTAR TODOS os questionários.");
 					listarTodos(bancoDeQuestionarios);
@@ -80,12 +80,8 @@ public class CaprichApp {
 		}
 		
 		
-
-		
-		
 		sc.close();
 		
-				
 	}
 
 	private static int getUltimoId(List<Questionario> bancoDeQuestionarios) {
