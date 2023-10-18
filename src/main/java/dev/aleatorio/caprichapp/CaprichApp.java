@@ -7,10 +7,13 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import dev.aleatorio.caprichapp.model.FaixaDeValores;
 import dev.aleatorio.caprichapp.model.Opcao;
@@ -19,6 +22,7 @@ import dev.aleatorio.caprichapp.model.Questionario;
 
 public class CaprichApp {
 	private static final String DIRETORIO_BASE = "C:\\temp\\caprichapp";
+	private static final String TEMPLATE_NOME_DO_ARQUIVO = DIRETORIO_BASE + File.separator + "questionario_${id}.txt";
 	private static final Gson GSON = new Gson();
 	
 	public static void main(String[] args) {
@@ -38,9 +42,12 @@ public class CaprichApp {
 		System.out.println("♥♥♥♥♥♥♥♥ 𝓒𝓪𝓹𝓻𝓲𝓬𝓱𝓐𝓹𝓹 ♥♥♥♥♥♥♥♥");
 		System.out.println("(っ◔◡◔)っ CADASTRO DE QUESTIONÁRIOS");
 		
-
+		listarTodos(bancoDeQuestionarios);
 		
+		System.out.println("Digite o id do questionário a ser listado: ");
+		String id = sc.next();
 		
+		listarPorId(id);
 		sc.close();
 		
 				
@@ -110,6 +117,24 @@ public class CaprichApp {
 		System.out.println("Questionário cadastrado com sucesso!");
 	}
 	
+	private static void deletar(String id) {
+		File arquivo = new File(TEMPLATE_NOME_DO_ARQUIVO.replace("${id}", id));
+		if(!arquivo.exists()) {
+			throw new RuntimeException("Arquivo não encontrado no diretório base");
+		} else {
+			if(arquivo.delete()) {
+				System.out.println("Arquivo com id " + id + " deletado com sucesso.");
+			} else {
+				throw new RuntimeException("Aconteceu algum erro e o arquivo não deletado.");
+			}
+		}
+	}
+	
+	private static void listarPorId(String id) {
+		File arquivo = new File(TEMPLATE_NOME_DO_ARQUIVO.replace("${id}", id));
+		System.out.println(extrairConteudo(arquivo));
+	}
+	
 	private static List<Questionario> carregarBancoQuestionarios(File diretorioBase){
 		List<Questionario> bancoDeQuestionarios = new ArrayList<>();
 		File[] arquivos = diretorioBase.listFiles();
@@ -154,7 +179,7 @@ public class CaprichApp {
 			throw new RuntimeException(e);
 		}
 			
-	} 
+	}
 	
 }
 
