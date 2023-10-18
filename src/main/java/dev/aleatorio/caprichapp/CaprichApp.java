@@ -48,6 +48,7 @@ public class CaprichApp {
 		String id = sc.next();
 		
 		listarPorId(id);
+		
 		sc.close();
 		
 				
@@ -69,7 +70,7 @@ public class CaprichApp {
 	private static void cadastrar(Scanner sc, int ultimoId) {
 		Questionario questionario = new Questionario();
 		
-		questionario.setId(ultimoId+1);
+		questionario.setId(++ultimoId);
 		
 		System.out.print("\nQual o título do questionário? ");
 		questionario.setTitulo(sc.nextLine());
@@ -130,9 +131,9 @@ public class CaprichApp {
 		}
 	}
 	
-	private static void listarPorId(String id) {
+	private static String listarPorId(String id) {
 		File arquivo = new File(TEMPLATE_NOME_DO_ARQUIVO.replace("${id}", id));
-		System.out.println(extrairConteudo(arquivo));
+		return extrairConteudo(arquivo);
 	}
 	
 	private static List<Questionario> carregarBancoQuestionarios(File diretorioBase){
@@ -170,8 +171,8 @@ public class CaprichApp {
 	}
 	
 	private static void salvarJsonEmArquivo(String json, Questionario ques) {
-		String nomeDoArquivo = String.format("%s%squestionario_%d.txt", 
-				DIRETORIO_BASE, File.separator, ques.getId()); 
+		String id = String.valueOf(ques.getId());
+		String nomeDoArquivo = TEMPLATE_NOME_DO_ARQUIVO.replace("${id}", id);
 		
 		try(BufferedWriter bw = new BufferedWriter(new FileWriter(nomeDoArquivo))){
 			bw.write(json);
