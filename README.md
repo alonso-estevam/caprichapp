@@ -122,10 +122,10 @@ Por exemplo, uma pergunta é composta pelo texto do enunciado e uma ou mais opç
 
 ![uml](https://github.com/alonso-estevam/caprichapp/assets/86576674/92b503dc-693c-4c1f-aced-e7343dd38476)
 
-Para uma explicação um pouco mais detalhada, fiz esse vídeo:
+Para uma explicação um pouco mais detalhada, fiz <a href="https://www.youtube.com/watch?v=7EdSoZzXKnM" target="_blank">esse vídeo</a>:
 
 [![Watch the video](https://img.youtube.com/vi/7EdSoZzXKnM/maxresdefault.jpg)](https://youtu.be/7EdSoZzXKnM)
-https://www.youtube.com/watch?v=7EdSoZzXKnM
+
 </details>
 
 <details>   
@@ -159,5 +159,6 @@ E) Editar um questionário
 * Quando o usuário selecionar a opção editar, precisará informar um id. Após isso, ele terá que cadastrar as informações de um questionário como se fosse cadastrar, a aplicação excluirá o questionário e cadastrará um novo
 ```
 <h3>Resolução</h3>
+Registrei a resolução desse capítulo <a href="https://youtube.com/playlist?list=PLjo6ymz9jJsqZAKq38PLB4-0tZMtlY6gl&feature=shared" target="_blank">nessa playlist</a>
 </details>
 
