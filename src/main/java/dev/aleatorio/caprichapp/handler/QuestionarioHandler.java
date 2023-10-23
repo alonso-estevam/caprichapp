@@ -17,19 +17,18 @@ public class QuestionarioHandler implements HttpHandler{
 
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
-		exchange.getRequestMethod();
-		exchange.sendResponseHeaders(200, response.length());
-		System.out.println("RESPONSE: \n" + response);
+		exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
+		exchange.sendResponseHeaders(200, response.getBytes().length);
         OutputStream outputStream = exchange.getResponseBody();
-        outputStream.flush();
         outputStream.write(response.getBytes());
+        outputStream.flush();
         outputStream.close();
 	}
 	
 	private String parseResponse(List<Questionario> questionarios) {
 		StringBuilder sb = new StringBuilder();
 		for(Questionario ques : questionarios) {
-			sb.append(DAO.converterQuestionarioEmJson(ques));
+			sb.append(QuestionarioDaoFileSystem.converterQuestionarioEmJson(ques));
 		}
 		return sb.toString();
 	}
