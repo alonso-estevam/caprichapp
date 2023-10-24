@@ -1,12 +1,9 @@
 package dev.aleatorio.caprichapp.dao;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,9 +13,10 @@ import dev.aleatorio.caprichapp.model.Questionario;
 
 public class QuestionarioDaoFileSystem implements QuestionarioDao {
 	private static final Path DIRETORIO_BASE = Path.of("C:\\temp\\caprichapp");
+	private static final String TEMPLATE_NOME_DO_ARQUIVO = 
+			DIRETORIO_BASE.toString() + File.separator + "questionario_${id}.txt";
 	private static final Gson GSON = new Gson();
 	
-
 	@Override
 	public List<Questionario> findAll(){
 		try(var pathStream = Files.list(DIRETORIO_BASE)){
@@ -32,22 +30,38 @@ public class QuestionarioDaoFileSystem implements QuestionarioDao {
 
 	@Override
 	public Questionario findById(Integer id) {
-		return null;
+		Path arquivo = Path.of(TEMPLATE_NOME_DO_ARQUIVO.replace("${id}", String.valueOf(id)));
+		StringBuilder sb = new StringBuilder();
+		try {
+			for(String linha : Files.readAllLines(arquivo)) {
+				sb.append(linha);
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		return converterJsonEmQuestionario(sb.toString());
 	}
 
 	@Override
 	public void insert(Questionario questionario) {
-		
+		salvarJsonEmArquivo(converterQuestionarioEmJson(questionario), questionario.getId());
 	}
 
 	@Override
-	public void update(Questionario questionario) {
-		
+	public void update(Integer id, Questionario questionario) {
+		deleteById(id);
+		questionario.setId(id);
+		insert(questionario);
 	}
 
 	@Override
 	public void deleteById(Integer id) {
-		
+		Path arquivo = Path.of(TEMPLATE_NOME_DO_ARQUIVO.replace("${id}", String.valueOf(id)));
+		try {
+			Files.deleteIfExists(arquivo);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	public static Questionario converterJsonEmQuestionario(String conteudo) {
@@ -56,6 +70,19 @@ public class QuestionarioDaoFileSystem implements QuestionarioDao {
 
 	public static String converterQuestionarioEmJson(Questionario questionario) {
 		return GSON.toJson(questionario); 
+	}
+	
+	public static void salvarJsonEmArquivo(String json, Integer id) {
+		Path arquivo = Path.of(TEMPLATE_NOME_DO_ARQUIVO.replace("${id}", String.valueOf(id)));
+		try {
+			if(Files.createFile(arquivo) != null) {
+				Files.writeString(arquivo, json);
+			}
+			
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		
 	}
 	
 	private static String extrairConteudo(Path arquivo) {

@@ -12,7 +12,7 @@ public interface QuestionarioDao {
 	
 	void insert(Questionario questionario);
 	
-    void update(Questionario questionario);
+    void update(Integer id, Questionario questionario);
     
     void deleteById(Integer id);
 	
