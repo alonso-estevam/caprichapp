@@ -162,3 +162,133 @@ E) Editar um questionário
 Registrei a resolução desse capítulo <a href="https://youtube.com/playlist?list=PLjo6ymz9jJsqZAKq38PLB4-0tZMtlY6gl&feature=shared" target="_blank">nessa playlist</a>
 </details>
 
+<details>
+    <summary><h2>Capitulo 5: API</h2></summary>
+    <h3>Contexto</h3>
+Clark chega extremamente empolgado na sua mesa. Sucesso é pouco para definir o resultado da apresentação do seu protótipo. A diretoria amou o resultado. Um dos diretores é sócio de um grande portal de variedades chamado Fuzz Beed e quer utilizar o CaprichApp o quanto antes no portal. Para que tudo funcione corretamente, o CaprichApp será transformado num servidor REST. Um dos sobrinhos dos diretores estava na reunião e já definou a assinatura das APIs que você deverá usar.
+
+Clark pergunta se você fez o CaprichApp em Java. Caso você tenha feito, ele consegue te indicar uma série tutoriais para te auxiliar nesse processo para auxiliar no trabalho. Além disso, ele te explica que num servidor REST cada requisição já vem meio que “completa” e usuário é quem irá passar os dados necessários em uma requisição sem interação com menu. Os testes da API podem ser feitos usando uma ferramenta como o curl ou o Postman.
+
+<h3>Requisitos</h3>
+Altere o CaprichApp removendo o menu e permitindo que ele atenda requisições REST conforme a especificação abaixo.
+
+    POST: /caprichapp/create -> Deve aceitar um JSON com a descrição do questionário e cadastrar ele (semelhante ao menu cadastrar)
+    GET: /caprichapp/ -> Deve retornar como um json todos questionários existentes (igual ao menu listar tudo)
+    DELETE: /caprichapp/{id} - Deve excluir um questionário (igual ao menu excluir)
+    GET: /caprichapp/{id} -> Deve retornar como um json os dados de um único questionár (igual ao menu descrever questionário)
+    PUT: /caprichapp/{id} -> Deve aceitar um JSON com a descrição do questionário e cadastrar ele (semelhante ao menu editar)
+
+
+<h3>Resolução</h3>
+Parte 1 - organizando o código com DAO
+
+A primeira coisa que tentei fazer foi organizar os métodos CRUD que estavam todos jogados na classe principal. Para isso, lembrei do padrão DAO - Data Access Object, que eu já tinha visto ser feito em aplicações que fazem conexão com banco de dados. 
+
+Nesse padrão, para cada domínio do negócio temos uma interface com os métodos CRUD e a respectiva implementação da interface e dos métodos, fazendo uma abstração do acesso ao banco de dados. No projeto ainda não estamos trabalhando com database, mas ainda estamos persistindo dados - no caso, no sistema de arquivos do computador. Assim, criei um pacote chamado `dao`, e dentro dele criei a interface `QuestionarioDao` com os métodos:
+```
+List<Questionario> findAll();
+Questionario findById(Integer id);
+void insert(Questionario questionario);
+void update(Questionario questionario);
+void deleteById(Integer id);
+```
+No mesmo pacote, criei a classe `QuestionarioDaoFileSystem` implementando a interface `QuestionarioDao`. Além de sobrescrever os métodos para as operações CRUD, também coloquei na classe `QuestionarioDaoFileSystem` as constantes:
+```
+private static final Path DIRETORIO_BASE = Path.of("C:\\temp\\caprichapp");
+private static final String TEMPLATE_NOME_DO_ARQUIVO = 
+			DIRETORIO_BASE.toString() + File.separator + "questionario_${id}.txt";
+private static final Gson GSON = new Gson();
+```
+Além disso, coloquei os métodos auxiliares de converter json em questionário e vice-versa e o de extrair o conteúdo de um arquivo, e refatorei os métodos para usar as classes Files e Path, do pacote java.nio.
+
+Parte 2 - o servidor
+
+A parte mais difícil foi pensar em como fazer um servidor para receber as requisições HTTP sem usar nenhum framework como o Spring, porque eu acho que não fazia sentido nessa etapa da trilha de estudos pular do manuseio de arquivos direto pra um framework, ainda mais sabendo que o próximo exercício é usar banco de dados (e farei primeiro com JDBC).
+
+Nesse cenário, pesquisei como fazer um servidor simples em java e encontrei duas alternativas. A primeira era com as classes do pacote `java.net`, que é parte da biblioteca padrão do Java SE. Nesse pacote estão classes úteis para operações de rede de baixo nível, como por exemplo manusear sockets, URLs e conexões de rede. Essa alternativa me pareceu um pouco mais trabalhosa.
+
+A outra opção estava no pacote `com.sun.net.httpserver`, que não faz parte da Java Standard Library oficial. Na verdade, é um pacote fornecido pela Oracle (Sun) JDK - que eu não fazia ideia - para a criação de servidores HTTP simples, fornecendo abstrações de alto nível para lidar com solicitações e respostas HTTP, facilitando a construção de servidores HTTP básicos. Nesse pacote estão classes como `HttpServer` e `HttpHandler` para simplificar a implementação do servidor. Em resumo, e nas palavras do ChatGPT, "a principal diferença é que o pacote `java.net` é um pacote de rede geral, enquanto o pacote `com.sun.net.httpserver` é especificamente adaptado para a criação de servidores HTTP simples".
+
+Nesse contexto, tentei construir o servidor da API com o pacote `com.sun.net.httpserver`. Na classe principal, quem orquestra o baile é o `HttpServer`, cujo método `create` recebe um `InetSocketAddress` - aqui, basicamente passamos um endereço IP e uma porta para que seja feito um bind com a instância do servidor. 
+Em seguida, usamos o método `createContext` do `HttpServer` para especificar a URI e sua respectiva `HttpHandler`, ou seja, a classe que vai lidar com as requisições para aquela determinada URI. 
+
+Por fim, temos o método `setExecutor`, que não entendi o que faz, mas aparentemente, quando está parâmetro `null`, utiliza a implementação padrão; e o método `start`, responsável por "iniciar este servidor em um novo thread em segundo plano".
+
+O código ficou assim:
+```
+HttpServer server = HttpServer.create(new InetSocketAddress(PORTA), 0);
+System.out.println("Servidor rodando na porta " + PORTA);
+server.createContext("/caprichapp", new QuestionarioHandler.SemParametro());
+server.createContext("/caprichapp/", new QuestionarioHandler.ComParametro());
+server.setExecutor(null);
+server.start();
+```
+
+Uma vez criada a instância do servidor e estabelecidas as URIs, passei para a implementação dos handlers. Como todos eles se referiam à mesma entidade - o questionário - concentrei tudo na mesma classe, chamada `QuestionarioHandler`. Nela, criei uma constante para armazenar uma instância do `QuestionarioDaoFileSystem`:
+
+`private static final QuestionarioDaoFileSystem DAO = new QuestionarioDaoFileSystem();`
+
+e fiz uso de nested classes (classes aninhadas estáticas): dentro de `QuestionarioHandler`, criei a classe `SemParametro` para lidar com as requisições GET e POST (as que não tem id na URI, como `/caprichapp`) e a `ComParametro` para lidar com as requisições DELETE, PUT e GET by id (ou seja, as que precisariam seguir o modelo`/caprichapp/2` ). Ambas as classes aninhadas implementam a interface `HttpHandler`, que só tem um método abstrato chamado `handle` - aliás, acho que se tivesse sido criada mais recente, a `HttpHandler` seria anotada como uma interface funcional. De todo modo, o método `handle` recebe um `HttpExchange`, que, conforme a documentação, "encapsula uma solicitação HTTP recebida e uma resposta a ser gerada em uma troca. Ele fornece métodos para examinar a solicitação do cliente e para construir e enviar a resposta."
+
+Um ponto importante é que a classe `HttpServer` não suporta diretamente a definição de rotas dinâmicas como "/caprichapp/{id}" com parâmetros de caminho, como encontramos no Spring, por exemplo. Por isso, uma solução foi extrair a parte dinâmica (o id em "/caprichapp/{id}") manualmente no handler. Gambiarristicamente, a classe `ComParametro`  ficou assim:
+
+```
+public static class ComParametro implements HttpHandler{
+		@Override
+		public void handle(HttpExchange exchange) throws IOException {
+			String requestURI = exchange.getRequestURI().getPath();
+			Integer id = null;
+			
+			String[] parts = requestURI.split("/");
+			if(parts.length > 0) {
+				id = Integer.valueOf(parts[2]);
+			}
+			
+			if("DELETE".equals(exchange.getRequestMethod())) {
+				DAO.deleteById(id);
+				String response = "Questionario com id %d deletado com sucesso!".formatted(id);
+				exchange.getResponseHeaders().set("Content-Type", "text/html, application/json; charset=UTF-8");
+				exchange.sendResponseHeaders(200, response.getBytes().length);
+				OutputStream outputStream = exchange.getResponseBody();
+				outputStream.write(response.getBytes());
+				outputStream.flush();
+				outputStream.close();
+				
+			} else if("PUT".equals(exchange.getRequestMethod())) {
+				StringBuilder requestBody = new StringBuilder();
+				try(BufferedReader br = new BufferedReader(new InputStreamReader(
+						exchange.getRequestBody(), StandardCharsets.UTF_8))){
+					String linha = null;
+					while((linha = br.readLine()) != null) {
+						requestBody.append(linha);
+					}
+				} catch(IOException e) {
+					throw new RuntimeException(e);
+				}
+				Questionario questionario = 
+						QuestionarioDaoFileSystem.converterJsonEmQuestionario(requestBody.toString());
+				
+				DAO.update(id, questionario);
+				
+				String response = "Questionario com id %d atualizado com sucesso!".formatted(questionario.getId());
+				exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
+				exchange.sendResponseHeaders(201, response.getBytes().length);
+		        OutputStream outputStream = exchange.getResponseBody();
+		        outputStream.write(response.getBytes());
+		        outputStream.flush();
+		        outputStream.close();
+		        
+			} else {
+				String response = QuestionarioDaoFileSystem.converterQuestionarioEmJson(DAO.findById(id));
+				exchange.getResponseHeaders().set("Content-Type", "text/html, application/json; charset=UTF-8");
+				exchange.sendResponseHeaders(200, response.getBytes().length);
+				OutputStream outputStream = exchange.getResponseBody();
+				outputStream.write(response.getBytes());
+				outputStream.flush();
+				outputStream.close();
+			}
+		}
+	}
+```
+
+</details>
