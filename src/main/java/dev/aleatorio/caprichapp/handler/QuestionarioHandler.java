@@ -17,9 +17,9 @@ public class QuestionarioHandler {
 	private static final QuestionarioDaoFileSystem DAO = new QuestionarioDaoFileSystem();
 	
 	public static class SemParametro implements HttpHandler{
-		private List<Questionario> questionarios = DAO.findAll();
-		private String response = parseResponse(questionarios);
-
+		private List<Questionario> questionarios;
+		private String response;
+		
 		@Override
 		public void handle(HttpExchange exchange) throws IOException {
 			if("POST".equals(exchange.getRequestMethod())) {
@@ -36,6 +36,8 @@ public class QuestionarioHandler {
 				Questionario questionario = 
 						QuestionarioDaoFileSystem.converterJsonEmQuestionario(requestBody.toString());
 				
+				questionarios = DAO.findAll();
+				
 				int ultimoId = getUltimoId(questionarios);
 				
 				questionario.setId(++ultimoId);
@@ -51,6 +53,8 @@ public class QuestionarioHandler {
 		        outputStream.close();
 		        
 			} else {
+				questionarios = DAO.findAll();
+				response = parseResponse(questionarios);
 				exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
 				exchange.sendResponseHeaders(200, response.getBytes().length);
 		        OutputStream outputStream = exchange.getResponseBody();
