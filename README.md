@@ -362,5 +362,52 @@ Fiz os testes das requisições no Postman:
 
 https://github.com/alonso-estevam/caprichapp/assets/86576674/7afe1453-a5fa-4830-a066-2808596b4b77
 
+<h3>Aprendizados</h3>
+Esse exercício me fez pesquisar bastante para encontrar um meio de fazer um servidor Java sem framework, e minha recompensa foi descobrir a existência dos pacotes `java.net` e `com.sun.net.httpserver`, sobre os quais nunca tinha ouvido falar nos cursos comuns sobre Java. Igualmente, tive que estudar mais sobre o funcionamento de servidores web, o que me fez assistir pela trigésima vez o super vídeo do Fabio Akita sobre sockets, servidor, client e web, disponível <a href="https://www.youtube.com/watch?v=lc6U93P4Sxw&pp=ygUUZmFiaW8gYWtpdGEgc2Vydmlkb3I%3D)">aqui</a> - e finalmente entendi um pouco do que diabos ele estava falando. 
+
+(Re)aprendi que um servidor é simplesmente um programa que "pede um bind de uma porta para o sistema operacional e fica em modo listen, de escuta, esperando para dar accept e abrir uma conexão com outro computador" (Akita, 2022). Aprendi que processos são instância de um programa em execução, e para enviar ou receber dados de um processo, precisamos saber em qual porta esse processo está rodando. Quando dois processos precisam se comunicar no mesmo computador, eles podem usar arquivos ou pipes, mas quando se trata de comunicação entre computadores diferentes, será preciso saber o número do endereço IP e da porta na qual o processo está rodando - por isso que pra fazer um servidor precisamos dessas duas informações, endereço IP (o famoso localhost, quando estamos trabalhando só na máquina local) e porta (que são só números escolhidos por convenção, como 3000 no Node ou 8080 no Apache Tomcat). Aprendi que até o número 1024 tem algumas portas pré-estabelecidas, como a 80 para o HTTP e 443 para o HTTPS (e que, por serem padrão, não precisamos digitar no navegador, por exemplo). Relembrei pontos importantes sobre o protocolo HTTP, e acabei me aprofundando um pouco mais sobre entrada e saída de dados no java, quando tive que resolver um problema com o charset do texto. 
+
+Falando agora mais especificamente sobre este item, o problema se deu porque, num primeiro momento, eu tinha usado o InputStream para receber os dados do corpo da requisição:
+```
+InputStream inputStream = exchange.getRequestBody();
+StringBuilder requestBody = new StringBuilder();
+int b;
+while((b = inputStream.read()) != -1) {
+	requestBody.append((char) b);
+}
+```
+Na verdade eu não entendi muito bem como esse código funcionou, porque depois descobri que a classe `InputStream` é abstrata (ou seja, não pode ser instanciada), assim como o método `getRequestBody()` é um método abstrato, sem implementação (mas que retorna um InputStream). Mas enfim, nesse código, o método `getRequestBody()` da classe `HttpExchange` retorna um stream (a documentação só diz que é um stream), que é lido com o método `read()` e atribuído a um inteiro b, e enquanto esse `int` representando o byte lido for diferente de -1, vamos convertendo-no em `char` e anexando ao `StringBuilder` que chamei de requestBody. 
+
+Porém, isso fazia com que o texto dos arquivos ficasse com os caracteres de acentuação, til, etc. meio bugados, assim:
+`VocÃª tem fÃ©?`
+
+Então me lembrei que alguns caracteres não são representados apenas por um byte e, por isso, converter direto o byte de int pra char pode dar problema. Para resolver esse tipo de situação, quando se trata de leitura e escrita de fluxo de dados, o Java nos fornece classes específicas para lidar com bytes e classes específicas para lidar com caracteres.
+
+Assim, devemos usar `FileInputStream` na leitura e `FileOutputStream` na escrita de arquivos orientados a bytes, por exemplo, e usar `FileReader` e `FileWriter`, respectivamente, na leitura e escrita de arquivos orientados a caracteres.
+
+No contexto da nossa API, não estamos lidando com arquivos nesse trecho em especial, mas sim com um fluxo de dados transferidos via rede. No entanto, de modo análogo aos arquivos, temos a classe `InputStreamReader` e `OutputStreamWriter` que, conforme a documentação, fazem a "ponte" entre byte streams e character streams (e vice-versa).
+
+Como nosso interesse é ler os dados do corpo da requisição, temos que usar um `InputStreamReader`. Essa classe vai ler os bytes da fonte de entrada (o corpo da requisição) e vai decodificar em caracteres usando Charset especificado, como o famoso UTF-8 ou o UTF-16. Podemos informar um Charset no construtor do `InputStreamReader` como String ou como Charset. Se não informarmos nada, será usado o Charset padrão, que "é determinado durante a inicialização da máquina virtual e normalmente depende da localidade e do conjunto de caracteres do sistema operacional subjacente." (<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/charset/Charset.html#defaultCharset()">Java Docs</a>)
+
+Voltando ao nosso código, já pensando em otimizar essa leitura, instanciei um `BufferedReader`, seguindo o exemplo da própria documentação que orienta a colocar um `InputStreamReader` dentro de um `BufferedReader`, assim: (<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/charset/Charset.html#defaultCharset()">Java Docs</a>)():
+```
+BufferedReader in
+   = new BufferedReader(new InputStreamReader(anInputStream));
+```
+O `BufferedReader` também tem o método `read()`, que lê um único caractere por vez e retorna o char ou -1 ao terminar de ler. Mas tem outro método mais otimizado: o `readLine()`, que lê uma linha de texto e retorna a String lida e `null` quando atinge o fim do stream. Desse modo, o código alterado ficou assim (e só pra garantir, coloquei o charset UTF-8):
+```
+StringBuilder requestBody = new StringBuilder();
+try(BufferedReader br = new BufferedReader(new InputStreamReader (exchange.getRequestBody(), StandardCharsets.UTF_8))){
+String linha = null;
+	while((linha = br.readLine()) != null) {
+		requestBody.append(linha);
+	}
+} catch(IOException e) {
+	throw new RuntimeException(e);
+}
+```
+E ao fazer a requisição POST com caracteres especiais da nossa língua portuguesa, tudo funcionou perfeitamente. 
+
+Esse foi um resumo de tudo que tive de pesquisar e estudar para fazer esse exercício. Ainda há muito o que melhorar, principalmente em relação a tratamento de exceções (nesse momento, apenas o "caminho feliz" funciona). Mas acho que por ora é suficiente.
 
 </details>
